@@ -1,27 +1,10 @@
 import Link from "next/link";
+import Navigation from "@/components/Navigation";
 
 export default function Lending() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2">
-              <svg className="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 13h2v8H3zM9 9h2v12H9zM15 5h2v16h-2zM21 1h2v20h-2z" />
-              </svg>
-              <span className="text-xl font-semibold text-gray-900">Haus Edge Capital</span>
-            </Link>
-            <div className="hidden md:flex items-center gap-8">
-              <Link href="/learn" className="text-gray-600 hover:text-gray-900 transition-colors">Learn</Link>
-              <Link href="/trade" className="text-gray-600 hover:text-gray-900 transition-colors">Trade</Link>
-              <Link href="/lending" className="text-emerald-600 font-medium transition-colors">Lending</Link>
-              <Link href="/blog" className="text-gray-600 hover:text-gray-900 transition-colors">Blog</Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation activePage="lending" />
 
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6 overflow-hidden">
@@ -261,7 +244,7 @@ export default function Lending() {
               </svg>
               <span className="text-xl font-semibold text-white">Haus Edge Capital</span>
             </Link>
-            <div className="flex items-center gap-8">
+            <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
               <Link href="/learn" className="text-gray-400 hover:text-white transition-colors">Learn</Link>
               <Link href="/trade" className="text-gray-400 hover:text-white transition-colors">Trade</Link>
               <Link href="/lending" className="text-emerald-400 font-medium transition-colors">Lending</Link>
