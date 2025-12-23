@@ -116,7 +116,7 @@ export default function Lending() {
                 </li>
               </ul>
               <a
-                href="https://www.sofi.com/personal-loans/"
+                href="https://www.sofi.com/invite/personal-loans?gcp=02ddf9e3-9612-4b51-85f4-d5577b2f0cfe&isAliasGcp=false"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn-primary inline-block px-8 py-4 rounded-full text-white font-semibold text-lg"
@@ -238,7 +238,7 @@ export default function Lending() {
             Affiliate link. Haus Edge Capital may earn a commission at no cost to you.
           </p>
           <a
-            href="https://www.sofi.com/personal-loans/"
+            href="https://www.sofi.com/invite/personal-loans?gcp=02ddf9e3-9612-4b51-85f4-d5577b2f0cfe&isAliasGcp=false"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block px-10 py-5 rounded-full bg-white text-emerald-600 font-semibold text-lg hover:bg-emerald-50 transition-colors"
