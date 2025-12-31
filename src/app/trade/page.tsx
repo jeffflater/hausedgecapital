@@ -122,7 +122,7 @@ export default function Trade() {
             Join millions of users who trust Coinbase to buy, sell, and manage their cryptocurrency portfolio.
           </p>
           <a
-            href="https://www.coinbase.com/signup"
+            href="https://go.fifo.media/coinbase"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-10 py-5 rounded-full bg-white hover:bg-blue-50 text-[#0052ff] font-semibold text-xl transition-colors"
@@ -232,7 +232,7 @@ export default function Trade() {
             Click below to create your account and start your crypto journey.
           </p>
           <a
-            href="https://www.coinbase.com/signup"
+            href="https://go.fifo.media/coinbase"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#0052ff] hover:bg-[#0041cc] text-white font-semibold text-lg transition-colors"
