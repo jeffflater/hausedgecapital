@@ -63,7 +63,6 @@ export default function DailyUpdates() {
             </svg>
           </div>
           <h2 className="text-2xl font-bold text-gray-900">Daily Updates</h2>
-          <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">AI Generated</span>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
@@ -91,10 +90,9 @@ export default function DailyUpdates() {
           </svg>
         </div>
         <h2 className="text-2xl font-bold text-gray-900">Daily Updates</h2>
-        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">AI Generated</span>
       </div>
       <p className="text-gray-600 mb-6 -mt-4">
-        Fresh insights generated daily by our AI, covering different crypto topics throughout the week.
+        Fresh insights covering different crypto topics throughout the week.
       </p>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         {posts.slice(0, 6).map((post) => {
@@ -127,7 +125,7 @@ export default function DailyUpdates() {
       {posts.length > 6 && (
         <div className="text-center mt-6">
           <span className="text-gray-500 text-sm">
-            Showing 6 of {posts.length} AI-generated posts
+            Showing 6 of {posts.length} posts
           </span>
         </div>
       )}
