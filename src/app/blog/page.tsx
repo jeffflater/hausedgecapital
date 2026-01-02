@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import DailyUpdates from "@/components/DailyUpdates";
 import blogPosts from "@/data/blog-posts.json";
 
 // Type definitions
@@ -131,6 +132,9 @@ export default function Blog() {
               );
             })}
           </div>
+
+          {/* Daily Updates - AI Generated Posts */}
+          <DailyUpdates />
 
           {/* Trading Strategies Section */}
           {tradingStrategyPosts.length > 0 && (
