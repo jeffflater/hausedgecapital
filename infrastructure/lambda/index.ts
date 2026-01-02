@@ -366,6 +366,21 @@ async function getExistingGeneratedPosts(bucket: string): Promise<BlogPost[]> {
   }
 }
 
+async function getStaticBlogPosts(bucket: string): Promise<BlogPost[]> {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: 'data/blog-posts.json',
+    });
+    const response = await s3Client.send(command);
+    const body = await response.Body?.transformToString();
+    return body ? JSON.parse(body) : [];
+  } catch (error) {
+    console.log('No static blog-posts.json found');
+    return [];
+  }
+}
+
 async function uploadToS3(bucket: string, key: string, content: string, contentType: string): Promise<void> {
   const command = new PutObjectCommand({
     Bucket: bucket,
@@ -378,23 +393,28 @@ async function uploadToS3(bucket: string, key: string, content: string, contentT
   console.log(`Uploaded: s3://${bucket}/${key}`);
 }
 
-async function updateSitemap(bucket: string, posts: BlogPost[]): Promise<void> {
+async function updateSitemap(bucket: string, staticPosts: BlogPost[], generatedPosts: BlogPost[]): Promise<void> {
   const baseUrl = 'https://hausedgecapital.com';
   const staticPages = ['', '/learn', '/trade', '/lending', '/blog'];
+  const today = new Date().toISOString().split('T')[0];
+
+  // Combine all blog posts for sitemap
+  const allBlogPosts = [...generatedPosts, ...staticPosts];
 
   const urls = [
     ...staticPages.map(page => `
   <url>
     <loc>${baseUrl}${page}</loc>
-    <changefreq>${page === '' ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${page === '' ? '1.0' : '0.8'}</priority>
+    <lastmod>${today}</lastmod>
+    <changefreq>${page === '' ? 'weekly' : page === '/blog' ? 'daily' : 'monthly'}</changefreq>
+    <priority>${page === '' ? '1.0' : page === '/blog' ? '0.9' : '0.8'}</priority>
   </url>`),
-    ...posts.map(post => `
+    ...allBlogPosts.map(post => `
   <url>
     <loc>${baseUrl}/blog/${post.slug}</loc>
-    <lastmod>${post.publishDate}</lastmod>
+    <lastmod>${post.publishDate || today}</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
   </url>`)
   ];
 
@@ -481,8 +501,9 @@ export const handler = async (event: unknown): Promise<{ statusCode: number; bod
     // Update generated-posts.json (separate file for AI-generated posts)
     await uploadToS3(bucket, 'data/generated-posts.json', JSON.stringify(allGeneratedPosts, null, 2), 'application/json');
 
-    // Update sitemap with generated posts
-    await updateSitemap(bucket, allGeneratedPosts);
+    // Get static blog posts and update sitemap with both static and generated posts
+    const staticPosts = await getStaticBlogPosts(bucket);
+    await updateSitemap(bucket, staticPosts, allGeneratedPosts);
 
     // Invalidate CloudFront cache
     await invalidateCloudFront(distributionId, [
