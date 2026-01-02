@@ -1,9 +1,14 @@
 import { SecretsManagerClient, GetSecretValueCommand } from '@aws-sdk/client-secrets-manager';
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
+import { CloudFrontClient, CreateInvalidationCommand } from '@aws-sdk/client-cloudfront';
 import OpenAI from 'openai';
 
-const secretsClient = new SecretsManagerClient({ region: process.env.AWS_REGION || 'us-east-1' });
+const region = process.env.AWS_REGION || 'us-east-1';
+const secretsClient = new SecretsManagerClient({ region });
+const s3Client = new S3Client({ region });
+const cloudfrontClient = new CloudFrontClient({ region });
 
-// 7-Day Weekly Topic Rotation - These are thematic guidelines, not specific titles
+// 7-Day Weekly Topic Rotation
 const TOPIC_SCHEDULE: Record<number, TopicConfig> = {
   0: { // Sunday
     theme: 'Evergreen SEO & Authority Boosters',
@@ -15,8 +20,6 @@ const TOPIC_SCHEDULE: Record<number, TopicConfig> = {
       Create comprehensive reference content that will remain relevant for years.
       Focus on: FAQs, comparisons between trading concepts, educational lists,
       common mistakes to avoid, or glossary-style content.
-      Examples of good topics: "Crypto Trading FAQs", "Common Mistakes",
-      "Best Timeframes for Trading", "Trading Glossary"
     `,
   },
   1: { // Monday
@@ -28,8 +31,6 @@ const TOPIC_SCHEDULE: Record<number, TopicConfig> = {
     guidelines: `
       Write for absolute beginners entering the crypto trading space.
       Explain concepts clearly without jargon. Use analogies to familiar concepts.
-      Examples: "What Is Crypto Trading?", "How to Start Trading Safely",
-      "Spot vs Futures Explained", "Terms Beginners Must Know"
     `,
   },
   2: { // Tuesday
@@ -40,10 +41,7 @@ const TOPIC_SCHEDULE: Record<number, TopicConfig> = {
     contentRole: 'High-intent, long-tail SEO',
     guidelines: `
       Provide actionable, detailed trading strategy explanations.
-      Include entry/exit criteria, risk management for the strategy,
-      when to use it, and when to avoid it.
-      Examples: "VWAP Strategy Explained", "RSI Divergence Strategy",
-      "EMA Ribbon for Trend Trading", "Breakout Strategy Guide"
+      Include entry/exit criteria, risk management, when to use it.
     `,
   },
   3: { // Wednesday
@@ -55,21 +53,17 @@ const TOPIC_SCHEDULE: Record<number, TopicConfig> = {
     guidelines: `
       Focus on the psychological and risk management aspects of trading.
       Be honest about the challenges. Provide practical frameworks.
-      Examples: "How Much Should You Risk Per Trade?", "Stop Loss Placement",
-      "Why Most Traders Lose Money", "Overtrading and How to Stop"
     `,
   },
   4: { // Thursday
     theme: 'Market Structure & Cycles',
     category: 'Market Structure',
     categoryColor: 'indigo',
-    searchIntent: 'market structure / cycles / support resistance / liquidity',
+    searchIntent: 'market structure / cycles / support resistance',
     contentRole: 'Intermediate authority content',
     guidelines: `
       Explain how markets work at a structural level.
-      Cover concepts like market cycles, support/resistance, liquidity, order flow.
-      Examples: "What Are Market Cycles?", "Bull vs Bear Markets",
-      "Support and Resistance Explained", "Liquidity Zones"
+      Cover concepts like market cycles, support/resistance, liquidity.
     `,
   },
   5: { // Friday
@@ -80,9 +74,7 @@ const TOPIC_SCHEDULE: Record<number, TopicConfig> = {
     contentRole: 'Bridge to investing + lending products',
     guidelines: `
       Focus on building wealth over time, not just day trading.
-      Cover position sizing, compounding, when NOT to trade, passive strategies.
-      Examples: "Trading vs Investing", "Dollar-Cost Averaging",
-      "When Not to Trade", "Compounding Gains Over Time"
+      Cover position sizing, compounding, when NOT to trade.
     `,
   },
   6: { // Saturday
@@ -90,12 +82,10 @@ const TOPIC_SCHEDULE: Record<number, TopicConfig> = {
     category: 'Lending',
     categoryColor: 'teal',
     searchIntent: 'crypto lending explained / passive income / yield',
-    contentRole: 'Educational monetization support - NOT sales-focused',
+    contentRole: 'Educational monetization support',
     guidelines: `
       Educate about crypto lending as a concept. Be neutral and risk-aware.
-      Never be promotional. Focus on how it works, risks involved, who it's for.
-      Examples: "What Is Crypto Lending?", "Crypto Lending vs Staking",
-      "Risks of Crypto Lending", "Who Should Consider Lending?"
+      Never be promotional. Focus on how it works, risks involved.
     `,
   },
 };
@@ -132,6 +122,17 @@ interface GeneratedContent {
   sections: BlogSection[];
 }
 
+// Color mappings for Tailwind classes
+const categoryColors: Record<string, { bg: string; text: string; bgLight: string; border: string }> = {
+  blue: { bg: 'bg-blue-600', text: 'text-blue-700', bgLight: 'bg-blue-100', border: 'border-blue-200' },
+  purple: { bg: 'bg-purple-600', text: 'text-purple-700', bgLight: 'bg-purple-100', border: 'border-purple-200' },
+  green: { bg: 'bg-green-600', text: 'text-green-700', bgLight: 'bg-green-100', border: 'border-green-200' },
+  indigo: { bg: 'bg-indigo-600', text: 'text-indigo-700', bgLight: 'bg-indigo-100', border: 'border-indigo-200' },
+  orange: { bg: 'bg-orange-600', text: 'text-orange-700', bgLight: 'bg-orange-100', border: 'border-orange-200' },
+  teal: { bg: 'bg-teal-600', text: 'text-teal-700', bgLight: 'bg-teal-100', border: 'border-teal-200' },
+  gray: { bg: 'bg-gray-600', text: 'text-gray-700', bgLight: 'bg-gray-100', border: 'border-gray-200' },
+};
+
 async function getSecret(secretArn: string): Promise<string> {
   const command = new GetSecretValueCommand({ SecretId: secretArn });
   const response = await secretsClient.send(command);
@@ -162,44 +163,33 @@ YOUR WRITING STYLE:
 - SEO-optimized with natural keyword integration
 - Always risk-aware and honest about the challenges of trading
 - Never give specific financial advice or promise returns
-- Use concrete examples and practical frameworks
 
 TODAY'S CONTENT THEME: ${config.theme}
 CATEGORY: ${config.category}
 TARGET SEARCH INTENT: ${config.searchIntent}
-CONTENT ROLE: ${config.contentRole}
 
 THEME GUIDELINES:
 ${config.guidelines}
 
-IMPORTANT: Generate a UNIQUE, ORIGINAL topic that fits within these thematic guidelines.
-Do NOT use generic titles. Create something specific and valuable.`;
+IMPORTANT: Generate a UNIQUE, ORIGINAL topic that fits within these thematic guidelines.`;
 
-  const userPrompt = `Generate a comprehensive, SEO-optimized blog post for today's theme.
+  const userPrompt = `Generate a comprehensive blog post for today's theme.
 
 REQUIREMENTS:
-1. Create a unique, specific title that fits the theme (not generic)
+1. Create a unique, specific title (not generic)
 2. Write a compelling meta description (150-160 characters)
-3. Structure the content with 4-5 detailed sections
+3. Structure with 4-5 detailed sections
 4. Each section should have 2-4 substantial paragraphs
-5. Total content should be 1200-1800 words
-6. Include practical examples, frameworks, or actionable advice
-7. End with a thoughtful conclusion that reinforces key learnings
+5. Include practical examples and actionable advice
 
-FORMAT YOUR RESPONSE AS JSON:
+FORMAT AS JSON:
 {
-  "title": "Your unique, SEO-optimized title here",
-  "description": "Compelling meta description under 160 characters",
+  "title": "Your unique title here",
+  "description": "Meta description under 160 characters",
   "sections": [
-    {
-      "heading": "Section Heading",
-      "content": "Full section content with multiple paragraphs separated by \\n\\n"
-    }
+    { "heading": "Section Heading", "content": "Paragraphs separated by \\n\\n" }
   ]
-}
-
-Remember: This content should provide genuine value to someone learning about crypto trading.
-Be specific, be helpful, be honest about risks.`;
+}`;
 
   const response = await openai.chat.completions.create({
     model: 'gpt-4-turbo-preview',
@@ -209,160 +199,304 @@ Be specific, be helpful, be honest about risks.`;
     ],
     response_format: { type: 'json_object' },
     max_tokens: 4000,
-    temperature: 0.8, // Slightly higher for more creative titles
+    temperature: 0.8,
   });
 
   const content = response.choices[0].message.content;
-  if (!content) {
-    throw new Error('No content generated from OpenAI');
-  }
-
+  if (!content) throw new Error('No content generated from OpenAI');
   return JSON.parse(content) as GeneratedContent;
 }
 
-function formatBlogPost(content: GeneratedContent, config: TopicConfig): BlogPost {
-  const slug = generateSlug(content.title);
-  const publishDate = new Date().toISOString().split('T')[0];
+function generateHTML(post: BlogPost): string {
+  const colors = categoryColors[post.categoryColor] || categoryColors.blue;
 
-  return {
-    slug,
-    category: config.category,
-    categoryColor: config.categoryColor,
-    title: content.title,
-    description: content.description,
-    imagePath: `/blog/${slug}.webp`, // Placeholder - could integrate DALL-E later
-    sections: content.sections,
-    publishDate,
-    generated: true,
-  };
+  const sectionsHTML = post.sections.map(section => {
+    const paragraphs = section.content.split('\n\n').map(p =>
+      `<p class="text-gray-600 mb-6 leading-relaxed">${escapeHtml(p)}</p>`
+    ).join('\n');
+    return `
+      <div class="mb-10">
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">${escapeHtml(section.heading)}</h2>
+        ${paragraphs}
+      </div>
+    `;
+  }).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${escapeHtml(post.title)} | Haus Edge Capital</title>
+  <meta name="description" content="${escapeHtml(post.description)}">
+  <meta property="og:title" content="${escapeHtml(post.title)}">
+  <meta property="og:description" content="${escapeHtml(post.description)}">
+  <meta property="og:type" content="article">
+  <link rel="canonical" href="https://hausedgecapital.com/blog/${post.slug}">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="icon" href="/favicon.ico">
+</head>
+<body class="min-h-screen bg-white">
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+          <svg class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13h2v8H3zM9 9h2v12H9zM15 5h2v16h-2zM21 1h2v20h-2z"/>
+          </svg>
+          <span class="text-xl font-semibold text-gray-900">Haus Edge Capital</span>
+        </a>
+        <div class="hidden md:flex items-center gap-8">
+          <a href="/learn" class="text-gray-600 hover:text-blue-600 transition-colors">Learn</a>
+          <a href="/trade" class="text-gray-600 hover:text-blue-600 transition-colors">Trade</a>
+          <a href="/lending" class="text-gray-600 hover:text-blue-600 transition-colors">Lending</a>
+          <a href="/blog" class="text-blue-600 font-medium">Blog</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Article -->
+  <article class="pt-24 pb-16">
+    <div class="max-w-4xl mx-auto px-6">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-sm text-gray-500 mb-8">
+        <a href="/blog" class="hover:text-blue-600 transition-colors">Blog</a>
+        <span>/</span>
+        <span class="text-gray-900">${escapeHtml(post.category)}</span>
+      </div>
+
+      <!-- Category Tag -->
+      <div class="inline-block mb-4 px-3 py-1 ${colors.bgLight} rounded-full">
+        <span class="${colors.text} font-medium text-sm">${escapeHtml(post.category)}</span>
+      </div>
+
+      <!-- Title -->
+      <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+        ${escapeHtml(post.title)}
+      </h1>
+
+      <!-- Meta Description -->
+      <p class="text-xl text-gray-600 mb-8">${escapeHtml(post.description)}</p>
+
+      <!-- Publish Date -->
+      <p class="text-sm text-gray-500 mb-12">Published: ${post.publishDate}</p>
+
+      <!-- Content -->
+      <div class="prose prose-lg max-w-none">
+        ${sectionsHTML}
+
+        <!-- CTA Box -->
+        <div class="${colors.bgLight} ${colors.border} border rounded-xl p-6 my-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">Practice Risk-Free</h3>
+          <p class="text-gray-600 mb-4">Master these concepts with paper trading before risking real capital.</p>
+          <a href="/learn" class="inline-flex items-center gap-2 px-6 py-3 rounded-full ${colors.bg} text-white font-semibold hover:opacity-90 transition-opacity">
+            Start Paper Trading
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="mt-12 pt-8 border-t border-gray-200">
+        <p class="text-sm text-gray-500">
+          <strong>Disclaimer:</strong> This article is for educational purposes only and does not constitute financial advice.
+          Trading involves significant risk of loss. Cryptocurrency investments are volatile and high-risk.
+          Always do your own research before making any investment decisions.
+        </p>
+      </div>
+    </div>
+  </article>
+
+  <!-- Footer -->
+  <footer class="py-12 px-6 bg-gray-900 border-t border-gray-800">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+        <a href="/" class="flex items-center gap-2">
+          <svg class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13h2v8H3zM9 9h2v12H9zM15 5h2v16h-2zM21 1h2v20h-2z"/>
+          </svg>
+          <span class="text-xl font-semibold text-white">Haus Edge Capital</span>
+        </a>
+        <div class="flex items-center gap-8">
+          <a href="/learn" class="text-gray-400 hover:text-white transition-colors">Learn</a>
+          <a href="/trade" class="text-gray-400 hover:text-white transition-colors">Trade</a>
+          <a href="/lending" class="text-gray-400 hover:text-white transition-colors">Lending</a>
+          <a href="/blog" class="text-blue-400 font-medium">Blog</a>
+        </div>
+        <p class="text-gray-500 text-sm">&copy; ${new Date().getFullYear()} Haus Edge Capital.</p>
+      </div>
+      <div class="mt-8 pt-8 border-t border-gray-800 text-center">
+        <p class="text-gray-500 text-xs">
+          This site contains affiliate links. Haus Edge Capital may receive compensation at no additional cost to you.
+          This website is for educational purposes only. Nothing on this site constitutes financial advice.
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>`;
 }
 
-async function commitToGitHub(
-  githubToken: string,
-  repo: string,
-  branch: string,
-  blogPost: BlogPost
-): Promise<{ sha: string }> {
-  const [owner, repoName] = repo.split('/');
-  const filePath = 'src/data/blog-posts.json';
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-  // Get current file content
-  const getFileResponse = await fetch(
-    `https://api.github.com/repos/${owner}/${repoName}/contents/${filePath}?ref=${branch}`,
-    {
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'HausEdge-BlogGenerator',
+async function getExistingPosts(bucket: string): Promise<BlogPost[]> {
+  try {
+    const command = new GetObjectCommand({
+      Bucket: bucket,
+      Key: 'data/blog-posts.json',
+    });
+    const response = await s3Client.send(command);
+    const body = await response.Body?.transformToString();
+    return body ? JSON.parse(body) : [];
+  } catch (error) {
+    // File might not exist yet
+    console.log('No existing blog-posts.json found, starting fresh');
+    return [];
+  }
+}
+
+async function uploadToS3(bucket: string, key: string, content: string, contentType: string): Promise<void> {
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    Body: content,
+    ContentType: contentType,
+    CacheControl: contentType.includes('html') ? 'public, max-age=3600' : 'public, max-age=86400',
+  });
+  await s3Client.send(command);
+  console.log(`Uploaded: s3://${bucket}/${key}`);
+}
+
+async function updateSitemap(bucket: string, posts: BlogPost[]): Promise<void> {
+  const baseUrl = 'https://hausedgecapital.com';
+  const staticPages = ['', '/learn', '/trade', '/lending', '/blog'];
+
+  const urls = [
+    ...staticPages.map(page => `
+  <url>
+    <loc>${baseUrl}${page}</loc>
+    <changefreq>${page === '' ? 'weekly' : 'monthly'}</changefreq>
+    <priority>${page === '' ? '1.0' : '0.8'}</priority>
+  </url>`),
+    ...posts.map(post => `
+  <url>
+    <loc>${baseUrl}/blog/${post.slug}</loc>
+    <lastmod>${post.publishDate}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>`)
+  ];
+
+  const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.join('\n')}
+</urlset>`;
+
+  await uploadToS3(bucket, 'sitemap.xml', sitemap, 'application/xml');
+}
+
+async function invalidateCloudFront(distributionId: string, paths: string[]): Promise<void> {
+  const command = new CreateInvalidationCommand({
+    DistributionId: distributionId,
+    InvalidationBatch: {
+      CallerReference: `blog-${Date.now()}`,
+      Paths: {
+        Quantity: paths.length,
+        Items: paths,
       },
-    }
-  );
-
-  let existingPosts: BlogPost[] = [];
-  let sha: string | null = null;
-
-  if (getFileResponse.ok) {
-    const fileData = await getFileResponse.json();
-    sha = fileData.sha;
-    const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
-    existingPosts = JSON.parse(content);
-  }
-
-  // Check if post with same slug already exists (avoid duplicates)
-  const existingIndex = existingPosts.findIndex((p) => p.slug === blogPost.slug);
-  if (existingIndex >= 0) {
-    // Make slug unique by appending date
-    blogPost.slug = `${blogPost.slug}-${Date.now()}`;
-    blogPost.imagePath = `/blog/${blogPost.slug}.webp`;
-  }
-
-  // Add new post at the beginning (newest first)
-  existingPosts.unshift(blogPost);
-
-  // Prepare the commit
-  const newContent = Buffer.from(JSON.stringify(existingPosts, null, 2)).toString('base64');
-
-  const commitBody: Record<string, unknown> = {
-    message: `Add blog post: ${blogPost.title}\n\nAuto-generated daily blog post for ${blogPost.publishDate}\nCategory: ${blogPost.category}`,
-    content: newContent,
-    branch,
-  };
-
-  if (sha) {
-    commitBody.sha = sha;
-  }
-
-  const commitResponse = await fetch(
-    `https://api.github.com/repos/${owner}/${repoName}/contents/${filePath}`,
-    {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${githubToken}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/vnd.github.v3+json',
-        'User-Agent': 'HausEdge-BlogGenerator',
-      },
-      body: JSON.stringify(commitBody),
-    }
-  );
-
-  if (!commitResponse.ok) {
-    const error = await commitResponse.text();
-    throw new Error(`GitHub commit failed: ${error}`);
-  }
-
-  const result = await commitResponse.json();
-  return { sha: result.commit.sha };
+    },
+  });
+  await cloudfrontClient.send(command);
+  console.log(`CloudFront invalidation created for: ${paths.join(', ')}`);
 }
 
 export const handler = async (event: unknown): Promise<{ statusCode: number; body: string }> => {
   console.log('Blog Generator Lambda triggered');
   console.log('Event:', JSON.stringify(event, null, 2));
 
+  const bucket = process.env.S3_BUCKET!;
+  const distributionId = process.env.CLOUDFRONT_DISTRIBUTION_ID!;
   const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const today = new Date();
   const dayName = dayNames[today.getDay()];
 
   try {
-    // Get secrets
-    console.log('Fetching secrets...');
-    const [openaiApiKey, githubToken] = await Promise.all([
-      getSecret(process.env.OPENAI_SECRET_ARN!),
-      getSecret(process.env.GITHUB_SECRET_ARN!),
-    ]);
-
-    // Initialize OpenAI
+    // Get OpenAI API key
+    console.log('Fetching OpenAI secret...');
+    const openaiApiKey = await getSecret(process.env.OPENAI_SECRET_ARN!);
     const openai = new OpenAI({ apiKey: openaiApiKey });
 
     // Get today's configuration
     const config = getTodayConfig();
+    console.log(`Today is ${dayName} - Theme: ${config.theme}`);
 
-    console.log(`Today is ${dayName}`);
-    console.log(`Theme: ${config.theme}`);
-    console.log(`Category: ${config.category}`);
-    console.log(`Content Role: ${config.contentRole}`);
-
-    // Generate the blog post content
+    // Generate blog content
     console.log('Generating blog post with OpenAI...');
     const generatedContent = await generateBlogContent(openai, config);
     console.log(`Generated title: ${generatedContent.title}`);
 
-    // Format for JSON storage
-    const blogPost = formatBlogPost(generatedContent, config);
-    console.log(`Formatted post with slug: ${blogPost.slug}`);
+    // Create blog post object
+    const slug = generateSlug(generatedContent.title);
+    const publishDate = today.toISOString().split('T')[0];
 
-    // Commit to GitHub
-    console.log('Committing to GitHub...');
-    const repo = process.env.GITHUB_REPO!;
-    const branch = process.env.GITHUB_BRANCH || 'main';
-    const commitResult = await commitToGitHub(githubToken, repo, branch, blogPost);
-    console.log(`Committed: ${commitResult.sha}`);
+    const blogPost: BlogPost = {
+      slug,
+      category: config.category,
+      categoryColor: config.categoryColor,
+      title: generatedContent.title,
+      description: generatedContent.description,
+      imagePath: `/blog/${slug}.webp`,
+      sections: generatedContent.sections,
+      publishDate,
+      generated: true,
+    };
+
+    // Get existing posts
+    const existingPosts = await getExistingPosts(bucket);
+
+    // Check for duplicate slug
+    if (existingPosts.some(p => p.slug === blogPost.slug)) {
+      blogPost.slug = `${slug}-${Date.now()}`;
+      blogPost.imagePath = `/blog/${blogPost.slug}.webp`;
+    }
+
+    // Add new post at beginning
+    const allPosts = [blogPost, ...existingPosts];
+
+    // Generate and upload HTML (matching Next.js export pattern: blog/slug.html)
+    const html = generateHTML(blogPost);
+    await uploadToS3(bucket, `blog/${blogPost.slug}.html`, html, 'text/html');
+
+    // Update blog-posts.json
+    await uploadToS3(bucket, 'data/blog-posts.json', JSON.stringify(allPosts, null, 2), 'application/json');
+
+    // Update sitemap
+    await updateSitemap(bucket, allPosts);
+
+    // Invalidate CloudFront cache
+    await invalidateCloudFront(distributionId, [
+      `/blog/${blogPost.slug}.html`,
+      '/blog.html',
+      '/sitemap.xml',
+      '/data/blog-posts.json',
+    ]);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
         success: true,
-        message: 'Blog post generated and committed successfully',
+        message: 'Blog post generated and published to S3',
         day: dayName,
         theme: config.theme,
         post: {
@@ -370,8 +504,8 @@ export const handler = async (event: unknown): Promise<{ statusCode: number; bod
           slug: blogPost.slug,
           category: blogPost.category,
           publishDate: blogPost.publishDate,
+          url: `https://hausedgecapital.com/blog/${blogPost.slug}`,
         },
-        commit: commitResult.sha,
       }),
     };
   } catch (error) {

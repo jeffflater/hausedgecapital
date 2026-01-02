@@ -58,6 +58,30 @@ export class HausEdgeStack extends cdk.Stack {
     });
 
     // ============================================
+    // CloudFront Function for URL Rewriting
+    // ============================================
+    const urlRewriteFunction = new cloudfront.Function(this, 'UrlRewriteFunction', {
+      functionName: 'hausedge-url-rewrite',
+      code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  // If URI ends with '/', serve index.html
+  if (uri.endsWith('/')) {
+    request.uri = uri + 'index.html';
+  }
+  // If URI doesn't have a file extension, add .html
+  else if (!uri.includes('.')) {
+    request.uri = uri + '.html';
+  }
+
+  return request;
+}
+      `),
+    });
+
+    // ============================================
     // CloudFront Distribution
     // ============================================
     const distribution = new cloudfront.Distribution(this, 'Distribution', {
@@ -66,6 +90,10 @@ export class HausEdgeStack extends cdk.Stack {
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         compress: true,
+        functionAssociations: [{
+          function: urlRewriteFunction,
+          eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+        }],
       },
       domainNames: [domainName, `www.${domainName}`],
       certificate: certificate,
@@ -114,11 +142,6 @@ export class HausEdgeStack extends cdk.Stack {
       description: 'OpenAI API key for blog generation',
     });
 
-    const githubSecret = new secretsmanager.Secret(this, 'GitHubToken', {
-      secretName: 'hausedge/github-token',
-      description: 'GitHub personal access token for committing blog posts',
-    });
-
     // ============================================
     // Lambda Function for Blog Post Generation
     // ============================================
@@ -131,9 +154,8 @@ export class HausEdgeStack extends cdk.Stack {
       memorySize: 512,
       environment: {
         OPENAI_SECRET_ARN: openaiSecret.secretArn,
-        GITHUB_SECRET_ARN: githubSecret.secretArn,
-        GITHUB_REPO: 'jeffflater/hausedgecapital', // Update this with actual repo
-        GITHUB_BRANCH: 'main',
+        S3_BUCKET: websiteBucket.bucketName,
+        CLOUDFRONT_DISTRIBUTION_ID: distribution.distributionId,
       },
       bundling: {
         minify: true,
@@ -144,7 +166,16 @@ export class HausEdgeStack extends cdk.Stack {
 
     // Grant Lambda access to secrets
     openaiSecret.grantRead(blogGeneratorLambda);
-    githubSecret.grantRead(blogGeneratorLambda);
+
+    // Grant Lambda access to S3 bucket (read/write for blog posts)
+    websiteBucket.grantReadWrite(blogGeneratorLambda);
+
+    // Grant Lambda access to invalidate CloudFront cache
+    blogGeneratorLambda.addToRolePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: ['cloudfront:CreateInvalidation'],
+      resources: [`arn:aws:cloudfront::${this.account}:distribution/${distribution.distributionId}`],
+    }));
 
     // ============================================
     // EventBridge Rule (Daily Trigger at 6 AM UTC)
@@ -226,12 +257,7 @@ export class HausEdgeStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'OpenAISecretArn', {
       value: openaiSecret.secretArn,
-      description: 'ARN for OpenAI API key secret - add your key via AWS Console',
-    });
-
-    new cdk.CfnOutput(this, 'GitHubSecretArn', {
-      value: githubSecret.secretArn,
-      description: 'ARN for GitHub token secret - add your token via AWS Console',
+      description: 'ARN for OpenAI API key secret',
     });
   }
 }
