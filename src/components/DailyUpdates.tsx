@@ -31,16 +31,18 @@ export default function DailyUpdates() {
   useEffect(() => {
     async function fetchPosts() {
       try {
-        const response = await fetch("/data/blog-posts.json", {
+        // Fetch from generated-posts.json - separate file that Lambda updates
+        // This file is NOT in the git repo so it won't be overwritten by deployments
+        const response = await fetch("/data/generated-posts.json", {
           cache: "no-store",
         });
         if (!response.ok) {
-          throw new Error("Failed to fetch posts");
+          // File doesn't exist yet - no generated posts
+          setPosts([]);
+          return;
         }
         const data = await response.json();
-        // Filter to only show AI-generated posts
-        const generatedPosts = data.filter((post: BlogPost) => post.generated === true);
-        setPosts(generatedPosts);
+        setPosts(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load posts");
       } finally {

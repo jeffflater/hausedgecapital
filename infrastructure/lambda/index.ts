@@ -350,18 +350,18 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;');
 }
 
-async function getExistingPosts(bucket: string): Promise<BlogPost[]> {
+async function getExistingGeneratedPosts(bucket: string): Promise<BlogPost[]> {
   try {
     const command = new GetObjectCommand({
       Bucket: bucket,
-      Key: 'data/blog-posts.json',
+      Key: 'data/generated-posts.json',
     });
     const response = await s3Client.send(command);
     const body = await response.Body?.transformToString();
     return body ? JSON.parse(body) : [];
   } catch (error) {
     // File might not exist yet
-    console.log('No existing blog-posts.json found, starting fresh');
+    console.log('No existing generated-posts.json found, starting fresh');
     return [];
   }
 }
@@ -462,34 +462,34 @@ export const handler = async (event: unknown): Promise<{ statusCode: number; bod
       generated: true,
     };
 
-    // Get existing posts
-    const existingPosts = await getExistingPosts(bucket);
+    // Get existing generated posts (separate file that won't be overwritten by deployments)
+    const existingGeneratedPosts = await getExistingGeneratedPosts(bucket);
 
     // Check for duplicate slug
-    if (existingPosts.some(p => p.slug === blogPost.slug)) {
+    if (existingGeneratedPosts.some(p => p.slug === blogPost.slug)) {
       blogPost.slug = `${slug}-${Date.now()}`;
       blogPost.imagePath = `/blog/${blogPost.slug}.webp`;
     }
 
     // Add new post at beginning
-    const allPosts = [blogPost, ...existingPosts];
+    const allGeneratedPosts = [blogPost, ...existingGeneratedPosts];
 
     // Generate and upload HTML (matching Next.js export pattern: blog/slug.html)
     const html = generateHTML(blogPost);
     await uploadToS3(bucket, `blog/${blogPost.slug}.html`, html, 'text/html');
 
-    // Update blog-posts.json
-    await uploadToS3(bucket, 'data/blog-posts.json', JSON.stringify(allPosts, null, 2), 'application/json');
+    // Update generated-posts.json (separate file for AI-generated posts)
+    await uploadToS3(bucket, 'data/generated-posts.json', JSON.stringify(allGeneratedPosts, null, 2), 'application/json');
 
-    // Update sitemap
-    await updateSitemap(bucket, allPosts);
+    // Update sitemap with generated posts
+    await updateSitemap(bucket, allGeneratedPosts);
 
     // Invalidate CloudFront cache
     await invalidateCloudFront(distributionId, [
       `/blog/${blogPost.slug}.html`,
       '/blog.html',
       '/sitemap.xml',
-      '/data/blog-posts.json',
+      '/data/generated-posts.json',
     ]);
 
     return {
