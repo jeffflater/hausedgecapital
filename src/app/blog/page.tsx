@@ -1,7 +1,65 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import blogPosts from "@/data/blog-posts.json";
+
+// Type definitions
+interface BlogSection {
+  heading: string;
+  content: string;
+}
+
+interface BlogPost {
+  slug: string;
+  category: string;
+  categoryColor: string;
+  title: string;
+  description: string;
+  imagePath: string;
+  sections: BlogSection[];
+  publishDate?: string;
+  generated?: boolean;
+}
+
+// Color mappings
+const categoryColors: Record<string, { border: string; text: string; hoverBorder: string }> = {
+  blue: { border: "border-blue-100", text: "text-blue-600", hoverBorder: "hover:border-blue-200" },
+  purple: { border: "border-purple-100", text: "text-purple-600", hoverBorder: "hover:border-purple-200" },
+  green: { border: "border-green-100", text: "text-green-600", hoverBorder: "hover:border-green-200" },
+  cyan: { border: "border-cyan-100", text: "text-cyan-600", hoverBorder: "hover:border-cyan-200" },
+  indigo: { border: "border-indigo-100", text: "text-indigo-600", hoverBorder: "hover:border-indigo-200" },
+  orange: { border: "border-orange-100", text: "text-orange-600", hoverBorder: "hover:border-orange-200" },
+  teal: { border: "border-teal-100", text: "text-teal-600", hoverBorder: "hover:border-teal-200" },
+  gray: { border: "border-gray-100", text: "text-gray-600", hoverBorder: "hover:border-gray-200" },
+};
+
+// Group posts by category
+function groupPostsByCategory(posts: BlogPost[]) {
+  const groups: Record<string, BlogPost[]> = {};
+  posts.forEach((post) => {
+    const category = post.category;
+    if (!groups[category]) {
+      groups[category] = [];
+    }
+    groups[category].push(post);
+  });
+  return groups;
+}
+
+// Get featured posts (first 3)
+function getFeaturedPosts(posts: BlogPost[]) {
+  return posts.slice(0, 3);
+}
 
 export default function Blog() {
+  const posts = blogPosts as BlogPost[];
+  const featuredPosts = getFeaturedPosts(posts);
+  const groupedPosts = groupPostsByCategory(posts);
+
+  // Get Trading Strategy posts
+  const tradingStrategyPosts = groupedPosts["Trading Strategy"] || [];
+  // Get Capital Growth posts
+  const capitalGrowthPosts = groupedPosts["Capital Growth"] || [];
+
   return (
     <div className="min-h-screen bg-white">
       <Navigation activePage="blog" />
@@ -39,209 +97,98 @@ export default function Blog() {
               Latest Articles
             </h2>
             <p className="text-gray-600">
-              Coming soon - educational content to help you on your crypto journey.
+              Educational content to help you on your crypto journey.
             </p>
           </div>
 
           {/* Featured Blog Posts */}
           <div className="grid md:grid-cols-3 gap-8 mb-20">
-            {/* Card 1 - Paper Trading 101 */}
-            <Link href="/blog/paper-trading-101" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-blue-200 transition-all group">
-              <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl mb-6 flex items-center justify-center">
-                <svg className="w-12 h-12 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-              </div>
-              <div className="text-sm text-blue-600 font-medium mb-2">Getting Started</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
-                Paper Trading 101: Why Practice Makes Perfect
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Learn why practicing with virtual money is the smartest first step for new crypto traders.
-              </p>
-            </Link>
+            {featuredPosts.map((post, index) => {
+              const colors = categoryColors[post.categoryColor] || categoryColors.blue;
+              const gradientFrom = index === 0 ? "from-blue-100" : index === 1 ? "from-cyan-100" : "from-blue-100";
+              const gradientTo = index === 0 ? "to-cyan-100" : index === 1 ? "to-blue-100" : "to-indigo-100";
+              const iconColor = index === 0 ? "text-blue-400" : index === 1 ? "text-cyan-400" : "text-indigo-400";
 
-            {/* Card 2 - Market Cycles */}
-            <Link href="/blog/market-cycles" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-cyan-200 transition-all group">
-              <div className="w-full h-48 bg-gradient-to-br from-cyan-100 to-blue-100 rounded-xl mb-6 flex items-center justify-center">
-                <svg className="w-12 h-12 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
-              </div>
-              <div className="text-sm text-cyan-600 font-medium mb-2">Strategy</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-cyan-600 transition-colors">
-                Understanding Market Cycles in Crypto
-              </h3>
-              <p className="text-gray-600 text-sm">
-                A beginner&apos;s guide to recognizing bull and bear markets in the cryptocurrency space.
-              </p>
-            </Link>
-
-            {/* Card 3 - Risk Management */}
-            <Link href="/blog/risk-management" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md hover:border-indigo-200 transition-all group">
-              <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl mb-6 flex items-center justify-center">
-                <svg className="w-12 h-12 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-              </div>
-              <div className="text-sm text-indigo-600 font-medium mb-2">Education</div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-indigo-600 transition-colors">
-                Risk Management: Protecting Your Portfolio
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Essential strategies for managing risk and preserving capital in volatile markets.
-              </p>
-            </Link>
+              return (
+                <Link
+                  key={post.slug}
+                  href={`/blog/${post.slug}`}
+                  className={`bg-white rounded-2xl p-6 shadow-sm border ${colors.border} hover:shadow-md ${colors.hoverBorder} transition-all group`}
+                >
+                  <div className={`w-full h-48 bg-gradient-to-br ${gradientFrom} ${gradientTo} rounded-xl mb-6 flex items-center justify-center`}>
+                    <svg className={`w-12 h-12 ${iconColor}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <div className={`text-sm ${colors.text} font-medium mb-2`}>{post.category}</div>
+                  <h3 className={`text-xl font-bold text-gray-900 mb-3 group-hover:${colors.text} transition-colors`}>
+                    {post.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm">
+                    {post.description}
+                  </p>
+                </Link>
+              );
+            })}
           </div>
 
           {/* Trading Strategies Section */}
-          <div className="mb-20">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
+          {tradingStrategyPosts.length > 0 && (
+            <div className="mb-20">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Trading Strategies</h2>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Trading Strategies</h2>
+              <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {tradingStrategyPosts.map((post) => (
+                  <Link
+                    key={post.slug}
+                    href={`/blog/${post.slug}`}
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group"
+                  >
+                    <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
+                    <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                      {post.title.replace(/:.*/g, "").replace("Strategy", "").trim()}
+                    </h3>
+                    <p className="text-gray-500 text-xs mt-1">{post.description.substring(0, 50)}...</p>
+                  </Link>
+                ))}
+              </div>
             </div>
-            <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
-              <Link href="/blog/strategy-scalping" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Scalping</h3>
-                <p className="text-gray-500 text-xs mt-1">Rapid trades for small gains</p>
-              </Link>
-              <Link href="/blog/strategy-breakout" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Breakout</h3>
-                <p className="text-gray-500 text-xs mt-1">Trade price level breaks</p>
-              </Link>
-              <Link href="/blog/strategy-vwap" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">VWAP</h3>
-                <p className="text-gray-500 text-xs mt-1">Volume weighted trading</p>
-              </Link>
-              <Link href="/blog/strategy-range-reversal" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Range Reversal</h3>
-                <p className="text-gray-500 text-xs mt-1">Sideways market trading</p>
-              </Link>
-              <Link href="/blog/strategy-pullback" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Pullback</h3>
-                <p className="text-gray-500 text-xs mt-1">Enter trends at discount</p>
-              </Link>
-              <Link href="/blog/strategy-momentum" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Momentum</h3>
-                <p className="text-gray-500 text-xs mt-1">Ride strong price moves</p>
-              </Link>
-              <Link href="/blog/strategy-micro-sr" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Micro S/R</h3>
-                <p className="text-gray-500 text-xs mt-1">Precision level trading</p>
-              </Link>
-              <Link href="/blog/strategy-rsi-divergence" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">RSI Divergence</h3>
-                <p className="text-gray-500 text-xs mt-1">Spot trend reversals</p>
-              </Link>
-              <Link href="/blog/strategy-bollinger-bands" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Bollinger Bands</h3>
-                <p className="text-gray-500 text-xs mt-1">Trade volatility</p>
-              </Link>
-              <Link href="/blog/strategy-ema-ribbon" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">EMA Ribbon</h3>
-                <p className="text-gray-500 text-xs mt-1">Visualize trend strength</p>
-              </Link>
-              <Link href="/blog/strategy-grid" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Grid Trading</h3>
-                <p className="text-gray-500 text-xs mt-1">Systematic range capture</p>
-              </Link>
-              <Link href="/blog/strategy-dca" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">DCA</h3>
-                <p className="text-gray-500 text-xs mt-1">Dollar-cost averaging</p>
-              </Link>
-              <Link href="/blog/strategy-mean-reversion" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Mean Reversion</h3>
-                <p className="text-gray-500 text-xs mt-1">Trade back to average</p>
-              </Link>
-              <Link href="/blog/strategy-trend-pullback" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Trend Pullback</h3>
-                <p className="text-gray-500 text-xs mt-1">Multi-timeframe entries</p>
-              </Link>
-              <Link href="/blog/strategy-liquidity-sweep" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group">
-                <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Liquidity Sweep</h3>
-                <p className="text-gray-500 text-xs mt-1">Trade stop hunts</p>
-              </Link>
-            </div>
-          </div>
+          )}
 
           {/* Capital Growth Strategies Section */}
-          <div>
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
+          {capitalGrowthPosts.length > 0 && (
+            <div>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold text-gray-900">Capital Growth Strategies</h2>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Capital Growth Strategies</h2>
+              <div className="grid md:grid-cols-3 gap-4">
+                {capitalGrowthPosts.map((post) => (
+                  <Link
+                    key={post.slug}
+                    href={`/blog/${post.slug}`}
+                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group"
+                  >
+                    <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
+                    <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
+                      {post.title.replace(/:.*/g, "").trim()}
+                    </h3>
+                    <p className="text-gray-500 text-xs mt-1">{post.description.substring(0, 60)}...</p>
+                  </Link>
+                ))}
+              </div>
             </div>
-            <div className="grid md:grid-cols-3 gap-4">
-              <Link href="/blog/capital-dynamic-position-sizing" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Dynamic Position Sizing</h3>
-                <p className="text-gray-500 text-xs mt-1">Adjust sizes based on equity and performance</p>
-              </Link>
-              <Link href="/blog/capital-preservation" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Capital Preservation</h3>
-                <p className="text-gray-500 text-xs mt-1">Protect your base during drawdowns</p>
-              </Link>
-              <Link href="/blog/capital-daily-guardrails" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Daily Guardrails</h3>
-                <p className="text-gray-500 text-xs mt-1">Set profit targets and loss limits</p>
-              </Link>
-              <Link href="/blog/capital-market-regime" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Market Regime Classifier</h3>
-                <p className="text-gray-500 text-xs mt-1">Adapt to market conditions</p>
-              </Link>
-              <Link href="/blog/capital-trade-aging" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Trade Aging Manager</h3>
-                <p className="text-gray-500 text-xs mt-1">Time-based exit management</p>
-              </Link>
-              <Link href="/blog/capital-profit-acceleration" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Profit Acceleration</h3>
-                <p className="text-gray-500 text-xs mt-1">Press your winning streaks</p>
-              </Link>
-              <Link href="/blog/capital-equity-curve" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Equity Curve Feedback</h3>
-                <p className="text-gray-500 text-xs mt-1">Trade your results</p>
-              </Link>
-              <Link href="/blog/capital-volatility-scaling" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Volatility Adaptive Scaling</h3>
-                <p className="text-gray-500 text-xs mt-1">Size positions for conditions</p>
-              </Link>
-              <Link href="/blog/capital-performance-rotator" className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group">
-                <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Strategy Performance Rotator</h3>
-                <p className="text-gray-500 text-xs mt-1">Adaptive allocation</p>
-              </Link>
-            </div>
-          </div>
-
+          )}
         </div>
       </section>
 

@@ -1,0 +1,27 @@
+{
+  "name": "hausedge-infrastructure",
+  "version": "1.0.0",
+  "description": "AWS CDK infrastructure for Haus Edge Capital",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "cdk": "cdk",
+    "deploy": "cdk deploy --all --profile ensomniamedia",
+    "destroy": "cdk destroy --all --profile ensomniamedia",
+    "diff": "cdk diff --profile ensomniamedia",
+    "synth": "cdk synth --profile ensomniamedia",
+    "bootstrap": "cdk bootstrap --profile ensomniamedia"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.170.0",
+    "constructs": "^10.4.2",
+    "esbuild": "^0.24.0",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "aws-cdk": "^2.170.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  }
+}

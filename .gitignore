@@ -39,3 +39,19 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# AWS CDK
+infrastructure/cdk/node_modules
+infrastructure/cdk/dist
+infrastructure/cdk/cdk.out
+infrastructure/cdk/*.js
+infrastructure/cdk/*.d.ts
+
+# Lambda
+infrastructure/lambda/node_modules
+
+# Terraform (legacy)
+*.tfstate
+*.tfstate.*
+.terraform/
+terraform.tfvars
