@@ -1,5 +1,20 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Personal Loans & Lending Options - Compare Rates",
+  description: "Explore flexible personal loan options with competitive rates. Compare lending solutions from trusted partners like SoFi to find the right fit for your financial goals.",
+  keywords: ["personal loans", "lending options", "SoFi loans", "low interest loans", "debt consolidation", "personal finance"],
+  openGraph: {
+    title: "Personal Loans & Lending Options - Compare Rates",
+    description: "Explore flexible personal loan options with competitive rates from trusted partners.",
+    url: "https://hausedgecapital.com/lending",
+  },
+  alternates: {
+    canonical: "https://hausedgecapital.com/lending",
+  },
+};
 
 export default function Lending() {
   return (

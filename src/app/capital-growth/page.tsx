@@ -1,6 +1,21 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import blogPosts from "@/data/blog-posts.json";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Capital Growth Strategies - Build Long-Term Crypto Wealth",
+  description: "Learn how to protect and grow your trading capital over time. Master position sizing, risk management, compounding, and portfolio strategies for sustainable wealth.",
+  keywords: ["capital growth", "wealth building", "position sizing", "risk management", "portfolio strategy", "compound growth", "long-term investing"],
+  openGraph: {
+    title: "Capital Growth Strategies - Build Long-Term Crypto Wealth",
+    description: "Learn strategies for protecting and growing your trading capital sustainably.",
+    url: "https://hausedgecapital.com/capital-growth",
+  },
+  alternates: {
+    canonical: "https://hausedgecapital.com/capital-growth",
+  },
+};
 
 // Type definitions
 interface BlogSection {

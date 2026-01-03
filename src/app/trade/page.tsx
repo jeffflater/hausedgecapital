@@ -1,5 +1,20 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Trade Crypto on Coinbase - Trusted Exchange",
+  description: "Start trading cryptocurrency on Coinbase, America's most trusted crypto exchange. Buy, sell, and trade Bitcoin, Ethereum, and 200+ cryptocurrencies securely.",
+  keywords: ["Coinbase", "crypto exchange", "buy Bitcoin", "trade cryptocurrency", "crypto trading platform", "buy Ethereum"],
+  openGraph: {
+    title: "Trade Crypto on Coinbase - Trusted Exchange",
+    description: "Start trading cryptocurrency on Coinbase, America's most trusted crypto exchange.",
+    url: "https://hausedgecapital.com/trade",
+  },
+  alternates: {
+    canonical: "https://hausedgecapital.com/trade",
+  },
+};
 
 export default function Trade() {
   return (

@@ -1,6 +1,21 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import blogPosts from "@/data/blog-posts.json";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Crypto Trading Strategies - Scalping, Swing Trading & More",
+  description: "Master proven crypto trading strategies from scalping to swing trading. Detailed guides with entry/exit criteria, risk management, and real-world examples.",
+  keywords: ["trading strategies", "crypto scalping", "swing trading", "day trading", "momentum trading", "breakout trading", "cryptocurrency strategies"],
+  openGraph: {
+    title: "Crypto Trading Strategies - Scalping, Swing Trading & More",
+    description: "Master proven crypto trading strategies with detailed guides and risk management tips.",
+    url: "https://hausedgecapital.com/trading-strategies",
+  },
+  alternates: {
+    canonical: "https://hausedgecapital.com/trading-strategies",
+  },
+};
 
 // Type definitions
 interface BlogSection {

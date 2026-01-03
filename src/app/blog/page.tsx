@@ -2,6 +2,21 @@ import Link from "next/link";
 import Navigation from "@/components/Navigation";
 import DailyUpdates from "@/components/DailyUpdates";
 import blogPosts from "@/data/blog-posts.json";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Crypto Trading Blog - Strategies, Education & Market Insights",
+  description: "Expert crypto trading strategies, capital growth tips, and market education. Learn trading techniques from scalping to swing trading, plus daily market updates.",
+  keywords: ["crypto blog", "trading strategies", "cryptocurrency education", "market analysis", "capital growth", "trading tips"],
+  openGraph: {
+    title: "Crypto Trading Blog - Strategies, Education & Market Insights",
+    description: "Expert crypto trading strategies, capital growth tips, and market education.",
+    url: "https://hausedgecapital.com/blog",
+  },
+  alternates: {
+    canonical: "https://hausedgecapital.com/blog",
+  },
+};
 
 // Type definitions
 interface BlogSection {

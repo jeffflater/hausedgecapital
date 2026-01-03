@@ -14,8 +14,78 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Haus Edge Capital | Your Financial Hub",
-  description: "Get personal loans with SoFi, learn crypto trading with Skiapaper, and trade for real on Coinbase. Haus Edge Capital helps you explore your financial options.",
+  metadataBase: new URL("https://hausedgecapital.com"),
+  title: {
+    default: "Haus Edge Capital | Crypto Trading Education & Financial Tools",
+    template: "%s | Haus Edge Capital",
+  },
+  description: "Learn crypto trading strategies, explore lending options, and build long-term wealth. Free paper trading education, expert guides, and trusted financial tools.",
+  keywords: ["crypto trading", "paper trading", "cryptocurrency education", "trading strategies", "crypto lending", "capital growth", "financial education"],
+  authors: [{ name: "Haus Edge Capital" }],
+  creator: "Haus Edge Capital",
+  publisher: "Haus Edge Capital",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://hausedgecapital.com",
+    siteName: "Haus Edge Capital",
+    title: "Haus Edge Capital | Crypto Trading Education & Financial Tools",
+    description: "Learn crypto trading strategies, explore lending options, and build long-term wealth. Free paper trading education, expert guides, and trusted financial tools.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Haus Edge Capital - Crypto Trading Education",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Haus Edge Capital | Crypto Trading Education & Financial Tools",
+    description: "Learn crypto trading strategies, explore lending options, and build long-term wealth.",
+    images: ["/og-image.png"],
+  },
+  alternates: {
+    canonical: "https://hausedgecapital.com",
+  },
+  verification: {
+    google: "G-07H8XGQGPF",
+  },
+};
+
+// JSON-LD Structured Data
+const organizationSchema = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Haus Edge Capital",
+  url: "https://hausedgecapital.com",
+  logo: "https://hausedgecapital.com/logo.png",
+  description: "Educational platform for crypto trading strategies, paper trading, and financial literacy.",
+  sameAs: [],
+};
+
+const websiteSchema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Haus Edge Capital",
+  url: "https://hausedgecapital.com",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: "https://hausedgecapital.com/blog?q={search_term_string}",
+    "query-input": "required name=search_term_string",
+  },
 };
 
 export default function RootLayout({
@@ -38,6 +108,14 @@ export default function RootLayout({
             gtag('config', 'G-07H8XGQGPF');
           `}
         </Script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

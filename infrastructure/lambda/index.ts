@@ -260,6 +260,33 @@ function generateHTML(post: BlogPost): string {
     return index === 0 ? sectionHTML + lendingCTA : sectionHTML;
   }).join('\n');
 
+  // Generate JSON-LD Article schema
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: post.publishDate,
+    dateModified: post.publishDate,
+    author: {
+      "@type": "Organization",
+      name: "Haus Edge Capital",
+      url: "https://hausedgecapital.com"
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Haus Edge Capital",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://hausedgecapital.com/logo.png"
+      }
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://hausedgecapital.com/blog/${post.slug}`
+    }
+  };
+
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -267,12 +294,30 @@ function generateHTML(post: BlogPost): string {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(post.title)} | Haus Edge Capital</title>
   <meta name="description" content="${escapeHtml(post.description)}">
+  <meta name="keywords" content="${post.category}, crypto trading, cryptocurrency, trading education">
+  <meta name="author" content="Haus Edge Capital">
+  <meta name="robots" content="index, follow">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://hausedgecapital.com/blog/${post.slug}">
   <meta property="og:title" content="${escapeHtml(post.title)}">
   <meta property="og:description" content="${escapeHtml(post.description)}">
-  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Haus Edge Capital">
+  <meta property="article:published_time" content="${post.publishDate}">
+  <meta property="article:author" content="Haus Edge Capital">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="${escapeHtml(post.title)}">
+  <meta name="twitter:description" content="${escapeHtml(post.description)}">
+
   <link rel="canonical" href="https://hausedgecapital.com/blog/${post.slug}">
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" href="/favicon.ico">
+
+  <!-- JSON-LD Structured Data -->
+  <script type="application/ld+json">${JSON.stringify(articleSchema)}</script>
 </head>
 <body class="min-h-screen bg-white">
   <!-- Navigation -->

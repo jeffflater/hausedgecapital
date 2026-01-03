@@ -1,5 +1,20 @@
 import Link from "next/link";
 import Navigation from "@/components/Navigation";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Learn Crypto Trading - Free Paper Trading Education",
+  description: "Master cryptocurrency trading without risking real money. Learn with Skiapaper's paper trading platform - practice strategies, understand markets, and build confidence risk-free.",
+  keywords: ["paper trading", "crypto trading simulator", "learn crypto trading", "trading practice", "Skiapaper", "cryptocurrency education"],
+  openGraph: {
+    title: "Learn Crypto Trading - Free Paper Trading Education",
+    description: "Master cryptocurrency trading without risking real money. Practice with paper trading before investing real capital.",
+    url: "https://hausedgecapital.com/learn",
+  },
+  alternates: {
+    canonical: "https://hausedgecapital.com/learn",
+  },
+};
 
 export default function Learn() {
   return (

@@ -40,8 +40,62 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 
   return {
-    title: `${post.title} | Haus Edge Capital`,
+    title: post.title,
     description: post.description,
+    keywords: [post.category, "crypto trading", "cryptocurrency", "trading education"],
+    openGraph: {
+      title: post.title,
+      description: post.description,
+      url: `https://hausedgecapital.com/blog/${post.slug}`,
+      type: "article",
+      publishedTime: post.publishDate,
+      authors: ["Haus Edge Capital"],
+      images: [
+        {
+          url: post.imagePath,
+          alt: post.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.description,
+      images: [post.imagePath],
+    },
+    alternates: {
+      canonical: `https://hausedgecapital.com/blog/${post.slug}`,
+    },
+  };
+}
+
+// Generate JSON-LD Article schema
+function generateArticleSchema(post: BlogPost) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    image: `https://hausedgecapital.com${post.imagePath}`,
+    datePublished: post.publishDate || new Date().toISOString(),
+    dateModified: post.publishDate || new Date().toISOString(),
+    author: {
+      "@type": "Organization",
+      name: "Haus Edge Capital",
+      url: "https://hausedgecapital.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Haus Edge Capital",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://hausedgecapital.com/logo.png",
+      },
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://hausedgecapital.com/blog/${post.slug}`,
+    },
   };
 }
 
@@ -99,8 +153,14 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   const colors = categoryColors[post.categoryColor] || categoryColors.blue;
 
+  const articleSchema = generateArticleSchema(post);
+
   return (
     <div className="min-h-screen bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       <Navigation activePage="blog" />
 
       {/* Article */}
