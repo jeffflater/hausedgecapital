@@ -38,15 +38,17 @@ export default function TradingStrategies() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 mb-6 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Blog
-          </Link>
+          <div className="mb-6">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-purple-600 hover:text-purple-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Blog
+            </Link>
+          </div>
           <div className="inline-block mb-4 px-3 py-1 bg-purple-100 rounded-full">
             <span className="text-purple-700 font-medium text-sm">Crypto Trading Education</span>
           </div>

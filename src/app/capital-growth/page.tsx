@@ -38,15 +38,17 @@ export default function CapitalGrowth() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto text-center">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 mb-6 transition-colors"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Blog
-          </Link>
+          <div className="mb-6">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Blog
+            </Link>
+          </div>
           <div className="inline-block mb-4 px-3 py-1 bg-green-100 rounded-full">
             <span className="text-green-700 font-medium text-sm">Long-Term Wealth Building</span>
           </div>
