@@ -223,16 +223,41 @@ FORMAT AS JSON:
 function generateHTML(post: BlogPost): string {
   const colors = categoryColors[post.categoryColor] || categoryColors.blue;
 
-  const sectionsHTML = post.sections.map(section => {
+  // SoFi Lending CTA to insert after first section
+  const sofiCTA = `
+      <div class="my-10 p-6 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl border border-teal-100">
+        <div class="flex flex-col md:flex-row items-center gap-6">
+          <div class="flex-shrink-0 w-16 h-16 bg-teal-100 rounded-2xl flex items-center justify-center">
+            <svg class="w-8 h-8 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <div class="flex-grow text-center md:text-left">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Ready to Put Your Crypto to Work?</h3>
+            <p class="text-gray-600">Explore crypto lending opportunities with SoFi. Earn passive income on your digital assets with a trusted platform.</p>
+          </div>
+          <a href="/lending" class="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-full hover:bg-teal-700 transition-colors">
+            Learn About Lending
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+  `;
+
+  const sectionsHTML = post.sections.map((section, index) => {
     const paragraphs = section.content.split('\n\n').map(p =>
       `<p class="text-gray-600 mb-6 leading-relaxed">${escapeHtml(p)}</p>`
     ).join('\n');
-    return `
+    const sectionHTML = `
       <div class="mb-10">
         <h2 class="text-2xl font-bold text-gray-900 mb-4">${escapeHtml(section.heading)}</h2>
         ${paragraphs}
       </div>
     `;
+    // Insert SoFi CTA after the first section
+    return index === 0 ? sectionHTML + sofiCTA : sectionHTML;
   }).join('\n');
 
   return `<!DOCTYPE html>
