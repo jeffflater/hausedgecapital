@@ -55,3 +55,4 @@ infrastructure/lambda/node_modules
 *.tfstate.*
 .terraform/
 terraform.tfvars
+infrastructure/lambda/dist/
