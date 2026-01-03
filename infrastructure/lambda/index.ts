@@ -316,6 +316,15 @@ function generateHTML(post: BlogPost): string {
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="icon" href="/favicon.ico">
 
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-07H8XGQGPF"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-07H8XGQGPF');
+  </script>
+
   <!-- JSON-LD Structured Data -->
   <script type="application/ld+json">${JSON.stringify(articleSchema)}</script>
 </head>
