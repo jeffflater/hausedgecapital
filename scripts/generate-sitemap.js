@@ -21,6 +21,9 @@ function generateSitemap() {
     { url: '/trade', priority: '0.8', changefreq: 'monthly' },
     { url: '/lending', priority: '0.8', changefreq: 'monthly' },
     { url: '/blog', priority: '0.9', changefreq: 'daily' },
+    { url: '/trading-strategies', priority: '0.8', changefreq: 'weekly' },
+    { url: '/capital-growth', priority: '0.8', changefreq: 'weekly' },
+    { url: '/daily-updates', priority: '0.9', changefreq: 'daily' },
   ];
 
   let sitemap = `<?xml version="1.0" encoding="UTF-8"?>

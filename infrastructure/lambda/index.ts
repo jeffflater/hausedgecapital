@@ -175,12 +175,25 @@ IMPORTANT: Generate a UNIQUE, ORIGINAL topic that fits within these thematic gui
 
   const userPrompt = `Generate a comprehensive blog post for today's theme.
 
-REQUIREMENTS:
+CRITICAL WORD COUNT REQUIREMENT:
+- The TOTAL post must be between 900-1,200 words (not including title/description)
+- This is MANDATORY - posts under 900 words are unacceptable
+- Aim for approximately 1,000-1,100 words for optimal length
+
+CONTENT REQUIREMENTS:
 1. Create a unique, specific title (not generic)
 2. Write a compelling meta description (150-160 characters)
-3. Structure with 4-5 detailed sections
-4. Each section should have 2-4 substantial paragraphs
-5. Include practical examples and actionable advice
+3. Structure with 5-6 detailed sections (more sections = more depth)
+4. Each section MUST have 3-4 substantial paragraphs (150-200 words per section minimum)
+5. Include practical examples, specific strategies, and actionable advice
+6. Add real-world scenarios and concrete use cases
+7. Explain the "why" behind concepts, not just the "what"
+
+DEPTH GUIDELINES:
+- Don't just list points - explain each concept thoroughly
+- Include specific numbers, percentages, or examples where relevant
+- Address common mistakes and how to avoid them
+- Provide step-by-step guidance where applicable
 
 FORMAT AS JSON:
 {
@@ -395,7 +408,7 @@ async function uploadToS3(bucket: string, key: string, content: string, contentT
 
 async function updateSitemap(bucket: string, staticPosts: BlogPost[], generatedPosts: BlogPost[]): Promise<void> {
   const baseUrl = 'https://hausedgecapital.com';
-  const staticPages = ['', '/learn', '/trade', '/lending', '/blog'];
+  const staticPages = ['', '/learn', '/trade', '/lending', '/blog', '/trading-strategies', '/capital-growth', '/daily-updates'];
   const today = new Date().toISOString().split('T')[0];
 
   // Combine all blog posts for sitemap

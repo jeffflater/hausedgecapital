@@ -136,61 +136,103 @@ export default function Blog() {
           {/* Daily Updates - AI Generated Posts */}
           <DailyUpdates />
 
-          {/* Trading Strategies Section */}
+          {/* Trading Strategies Callout */}
           {tradingStrategyPosts.length > 0 && (
             <div className="mb-20">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
+              <Link
+                href="/trading-strategies"
+                className="block bg-gradient-to-br from-purple-50 via-white to-indigo-50 rounded-2xl p-8 border border-purple-100 hover:border-purple-300 hover:shadow-lg transition-all group"
+              >
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-purple-100 rounded-2xl flex items-center justify-center group-hover:bg-purple-200 transition-colors">
+                      <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+                        Trading Strategies
+                      </h2>
+                      <p className="text-gray-600 mt-1">
+                        Explore {tradingStrategyPosts.length} proven strategies from scalping to swing trading
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white font-semibold rounded-full group-hover:bg-purple-700 transition-colors">
+                    View All Strategies
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Trading Strategies</h2>
-              </div>
-              <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-4">
-                {tradingStrategyPosts.map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-purple-200 transition-all group"
-                  >
-                    <div className="text-sm text-purple-600 font-medium mb-1">Strategy</div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">
+                {/* Preview of strategies */}
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {tradingStrategyPosts.slice(0, 6).map((post) => (
+                    <span
+                      key={post.slug}
+                      className="px-3 py-1 bg-white rounded-full text-sm text-gray-600 border border-purple-100"
+                    >
                       {post.title.replace(/:.*/g, "").replace("Strategy", "").trim()}
-                    </h3>
-                    <p className="text-gray-500 text-xs mt-1">{post.description.substring(0, 50)}...</p>
-                  </Link>
-                ))}
-              </div>
+                    </span>
+                  ))}
+                  {tradingStrategyPosts.length > 6 && (
+                    <span className="px-3 py-1 bg-purple-100 rounded-full text-sm text-purple-600 font-medium">
+                      +{tradingStrategyPosts.length - 6} more
+                    </span>
+                  )}
+                </div>
+              </Link>
             </div>
           )}
 
-          {/* Capital Growth Strategies Section */}
+          {/* Capital Growth Strategies Callout */}
           {capitalGrowthPosts.length > 0 && (
             <div>
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
+              <Link
+                href="/capital-growth"
+                className="block bg-gradient-to-br from-green-50 via-white to-emerald-50 rounded-2xl p-8 border border-green-100 hover:border-green-300 hover:shadow-lg transition-all group"
+              >
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                      <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900 group-hover:text-green-600 transition-colors">
+                        Capital Growth Strategies
+                      </h2>
+                      <p className="text-gray-600 mt-1">
+                        Learn {capitalGrowthPosts.length} strategies for protecting and growing your trading capital
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-full group-hover:bg-green-700 transition-colors">
+                    View All Strategies
+                    <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold text-gray-900">Capital Growth Strategies</h2>
-              </div>
-              <div className="grid md:grid-cols-3 gap-4">
-                {capitalGrowthPosts.map((post) => (
-                  <Link
-                    key={post.slug}
-                    href={`/blog/${post.slug}`}
-                    className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 hover:shadow-md hover:border-green-200 transition-all group"
-                  >
-                    <div className="text-sm text-green-600 font-medium mb-1">Capital Growth</div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-green-600 transition-colors">
+                {/* Preview of strategies */}
+                <div className="mt-6 flex flex-wrap gap-2">
+                  {capitalGrowthPosts.slice(0, 5).map((post) => (
+                    <span
+                      key={post.slug}
+                      className="px-3 py-1 bg-white rounded-full text-sm text-gray-600 border border-green-100"
+                    >
                       {post.title.replace(/:.*/g, "").trim()}
-                    </h3>
-                    <p className="text-gray-500 text-xs mt-1">{post.description.substring(0, 60)}...</p>
-                  </Link>
-                ))}
-              </div>
+                    </span>
+                  ))}
+                  {capitalGrowthPosts.length > 5 && (
+                    <span className="px-3 py-1 bg-green-100 rounded-full text-sm text-green-600 font-medium">
+                      +{capitalGrowthPosts.length - 5} more
+                    </span>
+                  )}
+                </div>
+              </Link>
             </div>
           )}
         </div>
