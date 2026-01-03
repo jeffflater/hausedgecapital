@@ -223,8 +223,8 @@ FORMAT AS JSON:
 function generateHTML(post: BlogPost): string {
   const colors = categoryColors[post.categoryColor] || categoryColors.blue;
 
-  // SoFi Lending CTA to insert after first section
-  const sofiCTA = `
+  // Generic Lending CTA to insert after first section
+  const lendingCTA = `
       <div class="my-10 p-6 bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl border border-teal-100">
         <div class="flex flex-col md:flex-row items-center gap-6">
           <div class="flex-shrink-0 w-16 h-16 bg-teal-100 rounded-2xl flex items-center justify-center">
@@ -233,11 +233,11 @@ function generateHTML(post: BlogPost): string {
             </svg>
           </div>
           <div class="flex-grow text-center md:text-left">
-            <h3 class="text-xl font-bold text-gray-900 mb-2">Ready to Put Your Crypto to Work?</h3>
-            <p class="text-gray-600">Explore crypto lending opportunities with SoFi. Earn passive income on your digital assets with a trusted platform.</p>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Explore Lending Options</h3>
+            <p class="text-gray-600">Discover flexible lending solutions to help you reach your financial goals. Compare rates and find the right fit for you.</p>
           </div>
           <a href="/lending" class="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-teal-600 text-white font-semibold rounded-full hover:bg-teal-700 transition-colors">
-            Learn About Lending
+            View Lending Options
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
             </svg>
@@ -256,8 +256,8 @@ function generateHTML(post: BlogPost): string {
         ${paragraphs}
       </div>
     `;
-    // Insert SoFi CTA after the first section
-    return index === 0 ? sectionHTML + sofiCTA : sectionHTML;
+    // Insert Lending CTA after the first section
+    return index === 0 ? sectionHTML + lendingCTA : sectionHTML;
   }).join('\n');
 
   return `<!DOCTYPE html>
