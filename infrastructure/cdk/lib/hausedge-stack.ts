@@ -156,6 +156,8 @@ function handler(event) {
         OPENAI_SECRET_ARN: openaiSecret.secretArn,
         S3_BUCKET: websiteBucket.bucketName,
         CLOUDFRONT_DISTRIBUTION_ID: distribution.distributionId,
+        STANDUP_API_KEY: 'd1be91102d7b4e8ba2d939e388bb7303574445880b2744fc90d2f75928fe3b65',
+        STANDUP_PROPERTY_ID: 'd6047a99-fcf8-4e31-b600-122c43b4638f',
       },
       bundling: {
         minify: true,

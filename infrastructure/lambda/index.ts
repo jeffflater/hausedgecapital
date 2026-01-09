@@ -533,6 +533,43 @@ async function invalidateCloudFront(distributionId: string, paths: string[]): Pr
   console.log(`CloudFront invalidation created for: ${paths.join(', ')}`);
 }
 
+async function sendStandupSummary(blogPost: BlogPost, config: TopicConfig): Promise<void> {
+  const apiKey = process.env.STANDUP_API_KEY;
+  const propertyId = process.env.STANDUP_PROPERTY_ID;
+
+  if (!apiKey || !propertyId) {
+    console.log('Standup API not configured, skipping notification');
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  const summary = `Generated blog post: "${blogPost.title}" (${config.category}). Published to https://hausedgecapital.com/blog/${blogPost.slug}`;
+
+  try {
+    const response = await fetch('https://bob.ensomniamedia.com/api/external/standup-summaries', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': apiKey,
+      },
+      body: JSON.stringify({
+        propertyId,
+        date: today,
+        summary,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error(`Standup API error: ${response.status} ${response.statusText}`);
+    } else {
+      const result = await response.json();
+      console.log('Standup summary sent successfully:', result.id);
+    }
+  } catch (error) {
+    console.error('Failed to send standup summary:', error instanceof Error ? error.message : 'Unknown error');
+  }
+}
+
 export const handler = async (event: unknown): Promise<{ statusCode: number; body: string }> => {
   console.log('Blog Generator Lambda triggered');
   console.log('Event:', JSON.stringify(event, null, 2));
@@ -596,6 +633,9 @@ export const handler = async (event: unknown): Promise<{ statusCode: number; bod
     // Get static blog posts and update sitemap with both static and generated posts
     const staticPosts = await getStaticBlogPosts(bucket);
     await updateSitemap(bucket, staticPosts, allGeneratedPosts);
+
+    // Send standup summary notification
+    await sendStandupSummary(blogPost, config);
 
     // Invalidate CloudFront cache
     await invalidateCloudFront(distributionId, [
