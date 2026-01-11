@@ -50,13 +50,60 @@ jobs:
             --exclude "robots.txt" \
             --exclude "data/generated-posts.json"
 
-      - name: Sync HTML files to S3 (short cache)
+      - name: Sync HTML files to S3 (short cache, exclude sitemap)
         run: |
           aws s3 sync ./out s3://${{ env.S3_BUCKET }} \
             --cache-control "public, max-age=3600" \
             --include "*.html" \
-            --include "sitemap.xml" \
-            --include "robots.txt"
+            --include "robots.txt" \
+            --exclude "sitemap.xml"
+
+      - name: Regenerate sitemap with all posts
+        run: |
+          # Fetch static and generated posts from S3
+          aws s3 cp s3://${{ env.S3_BUCKET }}/data/blog-posts.json /tmp/blog-posts.json || echo "[]" > /tmp/blog-posts.json
+          aws s3 cp s3://${{ env.S3_BUCKET }}/data/generated-posts.json /tmp/generated-posts.json || echo "[]" > /tmp/generated-posts.json
+
+          # Generate sitemap with all posts
+          node -e "
+            const fs = require('fs');
+            const staticPosts = JSON.parse(fs.readFileSync('/tmp/blog-posts.json', 'utf8'));
+            const generatedPosts = JSON.parse(fs.readFileSync('/tmp/generated-posts.json', 'utf8'));
+            const allPosts = [...generatedPosts, ...staticPosts];
+            const today = new Date().toISOString().split('T')[0];
+            const baseUrl = 'https://hausedgecapital.com';
+            const staticPages = ['', '/learn', '/trade', '/lending', '/blog', '/trading-strategies', '/capital-growth', '/daily-updates'];
+
+            const urls = [
+              ...staticPages.map(page => \`
+    <url>
+      <loc>\${baseUrl}\${page}</loc>
+      <lastmod>\${today}</lastmod>
+      <changefreq>\${page === '' ? 'weekly' : page === '/blog' || page === '/daily-updates' ? 'daily' : 'monthly'}</changefreq>
+      <priority>\${page === '' ? '1.0' : page === '/blog' || page === '/daily-updates' ? '0.9' : '0.8'}</priority>
+    </url>\`),
+              ...allPosts.map(post => \`
+    <url>
+      <loc>\${baseUrl}/blog/\${post.slug}</loc>
+      <lastmod>\${post.publishDate || today}</lastmod>
+      <changefreq>monthly</changefreq>
+      <priority>0.7</priority>
+    </url>\`)
+            ];
+
+            const sitemap = \`<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+          <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
+          \${urls.join('')}
+          </urlset>\`;
+
+            fs.writeFileSync('/tmp/sitemap.xml', sitemap);
+            console.log('Generated sitemap with ' + (staticPages.length + allPosts.length) + ' URLs');
+          "
+
+          # Upload regenerated sitemap
+          aws s3 cp /tmp/sitemap.xml s3://${{ env.S3_BUCKET }}/sitemap.xml \
+            --cache-control "public, max-age=3600" \
+            --content-type "application/xml"
 
       - name: Invalidate CloudFront cache
         env:
