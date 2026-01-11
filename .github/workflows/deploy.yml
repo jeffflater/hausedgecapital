@@ -75,26 +75,11 @@ jobs:
             const staticPages = ['', '/learn', '/trade', '/lending', '/blog', '/trading-strategies', '/capital-growth', '/daily-updates'];
 
             const urls = [
-              ...staticPages.map(page => \`
-    <url>
-      <loc>\${baseUrl}\${page}</loc>
-      <lastmod>\${today}</lastmod>
-      <changefreq>\${page === '' ? 'weekly' : page === '/blog' || page === '/daily-updates' ? 'daily' : 'monthly'}</changefreq>
-      <priority>\${page === '' ? '1.0' : page === '/blog' || page === '/daily-updates' ? '0.9' : '0.8'}</priority>
-    </url>\`),
-              ...allPosts.map(post => \`
-    <url>
-      <loc>\${baseUrl}/blog/\${post.slug}</loc>
-      <lastmod>\${post.publishDate || today}</lastmod>
-      <changefreq>monthly</changefreq>
-      <priority>0.7</priority>
-    </url>\`)
+              ...staticPages.map(page => \`<url><loc>\${baseUrl}\${page}</loc><lastmod>\${today}</lastmod><changefreq>\${page === '' ? 'weekly' : page === '/blog' || page === '/daily-updates' ? 'daily' : 'monthly'}</changefreq><priority>\${page === '' ? '1.0' : page === '/blog' || page === '/daily-updates' ? '0.9' : '0.8'}</priority></url>\`),
+              ...allPosts.map(post => \`<url><loc>\${baseUrl}/blog/\${post.slug}</loc><lastmod>\${post.publishDate || today}</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>\`)
             ];
 
-            const sitemap = \`<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-          <urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">
-          \${urls.join('')}
-          </urlset>\`;
+            const sitemap = \`<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\${urls.join('')}</urlset>\`;
 
             fs.writeFileSync('/tmp/sitemap.xml', sitemap);
             console.log('Generated sitemap with ' + (staticPages.length + allPosts.length) + ' URLs');
